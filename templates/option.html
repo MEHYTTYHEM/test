@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {# 登録フォーム #}
+    {% if editing_id %}
+        <h1>テスト予定の編集</h1>
+    {% else %}
+        <h1>テスト予定の登録</h1>
+    {% endif %}
+
+    <form method="POST">
+        {{ form.csrf_token }}
+        <div>
+            {{ form.subject.label }}<br>
+            {{ form.subject() }}
+            {% for error in form.subject.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.date.label }}<br>
+            {{ form.date(type="date") }} {# HTML5 date input type #}
+            {% for error in form.date.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.period.label }}<br>
+            {{ form.period() }}
+            {% for error in form.period.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.classroom.label }}<br>
+            {{ form.classroom() }}
+            {% for error in form.classroom.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.submit() }}
+            {% if editing_id %}
+                <a href="{{ url_for('option') }}">キャンセル</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <hr> {# 区切り線 #}
+
+    {# 既存のテスト予定リスト #}
+    <h1>登録済みのテスト予定</h1>
+    {% if test_schedules %}
+        <table>
+            <thead>
+                <tr>
+                    <th>授業名</th>
+                    <th>日付</th>
+                    <th>曜日時限</th>
+                    <th>教室</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in test_schedules %}
+                <tr>
+                    <td>{{ test.subject }}</td>
+                    <td>{{ test.date.strftime('%Y年%m月%d日') }}</td>
+                    <td>{{ test.display_period }}</td> {# ★変更点: app.pyで加工済みのプロパティを使用 #}
+                    <td>{{ test.display_classroom }}</td> {# ★変更点: app.pyで加工済みのプロパティを使用 #}
+                    <td>
+                        <a href="{{ url_for('edit_option', test_id=test.id) }}">編集</a>
+                        <form action="{{ url_for('delete_option', test_id=test.id) }}" method="POST" style="display:inline;">
+                            <input type="submit" value="削除" onclick="return confirm('本当にこの予定を削除しますか？');">
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>まだテスト予定が登録されていません。</p>
+    {% endif %}
+{% endblock %}
