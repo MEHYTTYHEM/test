@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>学期（セメスター）の登録</h1>
+    <form method="POST">
+        {{ semester_form.csrf_token }}
+        <div>
+            {{ semester_form.name.label }}<br>
+            {{ semester_form.name(size=30) }}
+            {% for error in semester_form.name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ semester_form.start_date.label }}<br>
+            {{ semester_form.start_date() }}
+            {% for error in semester_form.start_date.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ semester_form.submit() }}
+        </div>
+    </form>
+
+    <h2>登録済みの学期</h2>
+    {% if semesters %}
+        <table>
+            <thead>
+                <tr>
+                    <th>学期名</th>
+                    <th>開始日</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for semester in semesters %}
+                <tr>
+                    <td>{{ semester.name }}</td>
+                    <td>{{ semester.start_date.strftime('%Y年%m月%d日') }}</td>
+                    <td>
+                        <form action="{{ url_for('delete_semester', semester_id=semester.id) }}" method="POST" style="display:inline;">
+                            <input type="submit" value="削除" onclick="return confirm('本当にこの学期を削除しますか？');">
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>学期はまだ登録されていません。</p>
+    {% endif %}
+
+    <hr>
+
+    {# --- ▼▼▼ ここから下が休日登録フォームの変更箇所 ▼▼▼ --- #}
+    <h1>休日の登録</h1>
+    <p>単日の場合は開始日のみ、連休の場合は開始日と終了日の両方を入力してください。</p>
+    <form method="POST">
+        {{ holiday_form.csrf_token }}
+        <div>
+            {{ holiday_form.name.label }}<br>
+            {{ holiday_form.name(size=30) }}
+            {% for error in holiday_form.name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ holiday_form.date.label }}<br>
+            {{ holiday_form.date() }}
+            {% for error in holiday_form.date.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ holiday_form.end_date.label }}<br>
+            {{ holiday_form.end_date() }}
+            {% for error in holiday_form.end_date.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ holiday_form.submit() }}
+        </div>
+    </form>
+
+    <h2>登録済みの休日</h2>
+    {% if holidays %}
+        <table>
+            <thead>
+                <tr>
+                    <th>休日名</th>
+                    <th>期間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for holiday in holidays %}
+                <tr>
+                    <td>{{ holiday.name or '(名称なし)' }}</td>
+                    <td>
+                        {{ holiday.date.strftime('%Y年%m月%d日') }}
+                        {% if holiday.end_date and holiday.end_date != holiday.date %}
+                            ～ {{ holiday.end_date.strftime('%Y年%m月%d日') }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('delete_holiday', holiday_id=holiday.id) }}" method="POST" style="display:inline;">
+                            <input type="submit" value="削除" onclick="return confirm('本当にこの休日を削除しますか？');">
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>休日はまだ登録されていません。</p>
+    {% endif %}
+    {# --- ▲▲▲ ここまでが休日登録フォームの変更箇所 --- #}
+
+{% endblock %}
